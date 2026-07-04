@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
   // 2. Verificar que tiene el DISC asignado en alguna postulación
   const rPost = await fetch(
-    `${SUPABASE_URL}/rest/v1/postulaciones?candidato_id=eq.${candidato.id}&disc_solicitado=eq.true&select=id&limit=1`,
+    `${SUPABASE_URL}/rest/v1/postulaciones?candidato_id=eq.${candidato.id}&disc_solicitado=eq.Solicitado&select=id&limit=1`,
     { headers: { Authorization: `Bearer ${SUPABASE_KEY}`, apikey: SUPABASE_KEY } }
   );
 
