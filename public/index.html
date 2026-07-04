@@ -710,6 +710,9 @@ function selectOption(dim) {
   else if (a.least === null) a.least = dim;
   else                       a.least = dim;
   renderOptions(QUESTIONS[current], a); updateNextBtn();
+  if (a.most && a.least && a.most !== a.least) {
+    setTimeout(nextQuestion, 600);
+  }
 }
 function updateNextBtn() {
   const a = answers[current], btn = document.getElementById('btnNext');
