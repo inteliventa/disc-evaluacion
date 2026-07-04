@@ -379,13 +379,13 @@
 <!-- ERROR EMAIL NO ENCONTRADO -->
 <section class="section" id="sec-error">
   <div class="error-wrap">
-    <span class="error-icon">✉️</span>
-    <p class="error-title">Correo no registrado</p>
+    <span class="error-icon" id="errorIcon">✉️</span>
+    <p class="error-title" id="errorTitle">Correo no registrado</p>
     <p class="error-body" id="errorMsg">
       El correo ingresado no está asociado a ningún proceso de selección activo en Andrés Pardo Consultores.<br><br>
       Verifica que estás usando el mismo correo con el que postulaste, o contáctanos para más información.
     </p>
-    <button class="btn-back-intro" onclick="goBackToIntro()">← Intentar con otro correo</button>
+    <button class="btn-back-intro" id="errorBackBtn" onclick="goBackToIntro()">← Intentar con otro correo</button>
   </div>
 </section>
 
@@ -547,16 +547,70 @@ window.addEventListener('beforeunload', e => {
 });
 
 // ── Email ──────────────────────────────────────────────────────
-function tryStart() {
-  const input = document.getElementById('candidateEmail');
-  const error = document.getElementById('emailError');
-  const val   = input.value.trim();
+async function tryStart() {
+  const input  = document.getElementById('candidateEmail');
+  const errEl  = document.getElementById('emailError');
+  const btnEl  = document.getElementById('btnStart');
+  const val    = input.value.trim();
+
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    input.classList.add('error'); error.classList.add('visible'); input.focus(); return;
+    input.classList.add('error'); errEl.classList.add('visible'); input.focus(); return;
   }
-  input.classList.remove('error'); error.classList.remove('visible');
-  candidateEmail = val;
-  startAssessment();
+  input.classList.remove('error'); errEl.classList.remove('visible');
+
+  // Verificar en servidor antes de iniciar
+  btnEl.disabled = true;
+  btnEl.innerHTML = '<span class="spinner"></span> Verificando…';
+
+  try {
+    const res  = await fetch('/api/check-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: val }),
+    });
+    const data = await res.json();
+
+    if (res.status === 404) {
+      showErrorScreen(
+        '✉️', 'Correo no registrado',
+        'El correo ingresado no está asociado a ningún proceso de selección activo en Andrés Pardo Consultores.<br><br>Verifica que estás usando el mismo correo con el que postulaste, o contáctanos para más información.',
+        true
+      );
+      return;
+    }
+
+    if (res.status === 409) {
+      showErrorScreen(
+        '✅', `Hola${data.nombre ? ', ' + data.nombre.split(' ')[0] : ''}`,
+        'Ya completaste esta evaluación anteriormente. El equipo de selección tiene acceso a tu resultado.<br><br>No es necesario realizarla nuevamente.',
+        false
+      );
+      return;
+    }
+
+    if (!res.ok) throw new Error('Error de servidor');
+
+    candidateEmail = val;
+    startAssessment();
+
+  } catch (err) {
+    btnEl.disabled = false;
+    btnEl.innerHTML = 'Comenzar <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    errEl.textContent = 'Error de conexión. Intenta nuevamente.';
+    errEl.classList.add('visible');
+  }
+}
+
+function showErrorScreen(icon, title, msg, showBack) {
+  document.getElementById('errorIcon').textContent   = icon;
+  document.getElementById('errorTitle').textContent  = title;
+  document.getElementById('errorMsg').innerHTML      = msg;
+  document.getElementById('errorBackBtn').style.display = showBack ? '' : 'none';
+  showSection('sec-error');
+  // Resetear botón
+  const btnEl = document.getElementById('btnStart');
+  btnEl.disabled = false;
+  btnEl.innerHTML = 'Comenzar <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 }
 document.getElementById('candidateEmail').addEventListener('keydown', e => { if (e.key === 'Enter') tryStart(); });
 document.getElementById('candidateEmail').addEventListener('input', () => {
