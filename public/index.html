@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación de Perfil · Andrés Pardo Consultores</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #141622; --card: #1E2238; --card-hover: #252942;
+    --border: #2E3354; --text: #EEF0F8; --muted: #7A82A6;
+    --D: #E8533A; --I: #F5A623; --S: #3DBFA8; --C: #6B8FFF;
+  }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem 4rem;
+  }
+  .site-header {
+    width: 100%; max-width: 660px;
+    display: flex; align-items: center; margin-bottom: 3rem;
+  }
+  .header-brand { display: flex; align-items: center; gap: .75rem; }
+  .logo-mark {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px; width: 16px; height: 16px;
+  }
+  .logo-mark span { display: block; border-radius: 2px; }
+  .logo-mark .lA { background: var(--D); }
+  .logo-mark .lB { background: var(--I); }
+  .logo-mark .lC { background: var(--S); }
+  .logo-mark .lD { background: var(--C); }
+  .site-name {
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+  }
+  .section { width: 100%; max-width: 660px; display: none; }
+  .section.active { display: block; }
+
+  /* Intro */
+  .intro-eyebrow {
+    font-size: .72rem; font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem;
+  }
+  .intro-title {
+    font-size: clamp(2rem, 6vw, 3rem); font-weight: 800;
+    line-height: 1.08; letter-spacing: -.02em; text-wrap: balance; margin-bottom: 1.4rem;
+  }
+  .intro-title em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--D) 0%, var(--I) 40%, var(--S) 70%, var(--C) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .intro-body {
+    font-size: 1rem; line-height: 1.75; color: #B4B9D4;
+    max-width: 540px; margin-bottom: 1.4rem;
+  }
+  .warning-grid { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 2rem; }
+  .warn-card {
+    display: flex; align-items: flex-start; gap: .8rem;
+    border: 1px solid; border-radius: 10px; padding: .85rem 1rem;
+  }
+  .warn-card.yellow { background: rgba(245,166,35,0.06); border-color: rgba(245,166,35,0.22); }
+  .warn-card.red    { background: rgba(232,83,58,0.06);  border-color: rgba(232,83,58,0.22); }
+  .warn-icon { font-size: .95rem; flex-shrink: 0; margin-top: .05rem; }
+  .warn-text { font-size: .82rem; line-height: 1.6; }
+  .warn-card.yellow .warn-text { color: #C9A84C; }
+  .warn-card.yellow .warn-text strong { color: #F5C060; }
+  .warn-card.red .warn-text { color: #D97B6A; }
+  .warn-card.red .warn-text strong { color: #F0866E; }
+
+  .email-form { margin-bottom: 2rem; }
+  .email-label {
+    display: block; font-size: .75rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+  }
+  .email-row { display: flex; gap: .6rem; }
+  .email-input {
+    flex: 1; background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: .75rem 1rem; color: var(--text);
+    font-size: .95rem; font-family: inherit; outline: none;
+    transition: border-color .15s;
+  }
+  .email-input::placeholder { color: var(--muted); }
+  .email-input:focus { border-color: #4A527A; }
+  .email-input.error { border-color: var(--D); }
+  .email-error { font-size: .75rem; color: var(--D); margin-top: .4rem; display: none; }
+  .email-error.visible { display: block; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--text); color: var(--bg);
+    font-size: .9rem; font-weight: 700; letter-spacing: .03em;
+    border: none; border-radius: 10px; padding: .9rem 2rem;
+    cursor: pointer; transition: opacity .15s, transform .12s; white-space: nowrap;
+  }
+  .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .4; pointer-events: none; }
+
+  /* Spinner en el botón */
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(20,22,34,0.3);
+    border-top-color: var(--bg); border-radius: 50%;
+    animation: spin .6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Progress */
+  .progress-bar-wrap { width: 100%; max-width: 660px; margin-bottom: 2rem; }
+  .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; }
+  .progress-label {
+    font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  }
+  .progress-track { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--D), var(--I), var(--S), var(--C));
+    border-radius: 99px; transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Timer */
+  .timer-wrap { display: flex; align-items: center; gap: .5rem; }
+  .timer-ring-wrap { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
+  #timerSvg { transform: rotate(-90deg); width: 36px; height: 36px; }
+  #timerTrack { fill: none; stroke: var(--border); stroke-width: 3; }
+  #timerArc   { fill: none; stroke: var(--S); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s; }
+  .timer-num {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .timer-label { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .timer-wrap.warn   .timer-label { color: var(--I); }
+  .timer-wrap.warn   #timerArc   { stroke: var(--I); }
+  .timer-wrap.danger .timer-label { color: var(--D); }
+  .timer-wrap.danger #timerArc   { stroke: var(--D); }
+
+  /* Questions */
+  .question-label {
+    font-size: .72rem; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .9rem;
+  }
+  .question-text { font-size: 1.25rem; font-weight: 700; line-height: 1.35; text-wrap: balance; margin-bottom: .5rem; }
+  .question-sub  { font-size: .88rem; color: var(--muted); margin-bottom: 2rem; }
+  .options-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-bottom: 2rem; }
+  .option-btn {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 1.1rem 1rem; text-align: left; cursor: pointer;
+    transition: border-color .15s, background .15s, transform .1s;
+    display: flex; flex-direction: column; gap: .3rem; position: relative;
+  }
+  .option-btn:hover { background: var(--card-hover); border-color: #3E4568; transform: translateY(-1px); }
+  .option-btn.selected-most  { border-color: var(--text); background: rgba(238,240,248,0.06); }
+  .option-btn.selected-least { border-color: var(--muted); background: rgba(122,130,166,0.07); opacity: .75; }
+  .option-btn.locked { pointer-events: none; opacity: .5; }
+  .option-word { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .option-hint { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+  .option-badge {
+    position: absolute; top: .6rem; right: .7rem;
+    font-size: .6rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    padding: .2rem .5rem; border-radius: 99px;
+  }
+  .badge-most  { background: rgba(238,240,248,0.15); color: var(--text); }
+  .badge-least { background: rgba(122,130,166,0.15); color: var(--muted); }
+
+  .timeout-notice {
+    display: none; align-items: center; gap: .6rem;
+    background: rgba(232,83,58,0.08); border: 1px solid rgba(232,83,58,0.25);
+    border-radius: 8px; padding: .65rem .9rem; font-size: .8rem; color: #E8886E; margin-bottom: 1.5rem;
+  }
+  .timeout-notice.visible { display: flex; }
+
+  .nav-row { display: flex; align-items: center; justify-content: flex-end; }
+  .btn-next {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--text); color: var(--bg); font-size: .88rem; font-weight: 700;
+    border: none; border-radius: 9px; padding: .75rem 1.6rem;
+    cursor: pointer; transition: opacity .15s; opacity: .35; pointer-events: none;
+  }
+  .btn-next.ready { opacity: 1; pointer-events: auto; }
+
+  /* Sending screen */
+  .sending-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 4rem 2rem; text-align: center; gap: 1.5rem;
+  }
+  .sending-spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border); border-top-color: var(--S);
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  .sending-title { font-size: 1.1rem; font-weight: 700; }
+  .sending-sub   { font-size: .88rem; color: var(--muted); }
+
+  /* Results */
+  .results-eyebrow {
+    font-size: .72rem; font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 1rem;
+  }
+  .results-title { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: .4rem; }
+  .results-candidate {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(61,191,168,0.1); border: 1px solid rgba(61,191,168,0.25);
+    border-radius: 99px; padding: .3rem .9rem; margin-bottom: .5rem;
+    font-size: .8rem; font-weight: 600; color: var(--S);
+  }
+  .results-profile-label { font-size: .85rem; color: var(--muted); margin-bottom: 2.5rem; }
+
+  .success-notice {
+    display: flex; align-items: flex-start; gap: .75rem;
+    background: rgba(61,191,168,0.07); border: 1px solid rgba(61,191,168,0.22);
+    border-radius: 10px; padding: .9rem 1.1rem; margin-bottom: 2rem;
+    font-size: .82rem; color: #6DCFBF; line-height: 1.55;
+  }
+  .success-notice strong { color: #3DBFA8; }
+
+  .chart-container {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 1.5rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; align-items: center;
+  }
+  #radarCanvas { width: 100%; max-width: 320px; height: 320px; }
+
+  .bars-section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .bars-title {
+    font-size: .72rem; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem;
+  }
+  .bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .85rem; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { font-size: .78rem; color: var(--muted); width: 90px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 99px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+  .bar-pct   { font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; width: 38px; text-align: right; }
+
+  .profile-cards { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 2rem; }
+  .profile-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.3rem 1.4rem; border-left: 3px solid transparent; opacity: .45;
+  }
+  .profile-card.dominant  { opacity: 1; }
+  .profile-card.secondary { opacity: .72; }
+  .profile-card-header { display: flex; align-items: center; gap: .7rem; margin-bottom: .6rem; }
+  .profile-card-dot    { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .profile-card-name   { font-size: .92rem; font-weight: 700; }
+  .profile-card-tag {
+    margin-left: auto; font-size: .6rem; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; padding: .25rem .6rem; border-radius: 99px;
+    background: rgba(255,255,255,0.07); color: var(--muted);
+  }
+  .profile-card.dominant .profile-card-tag { background: rgba(255,255,255,0.12); color: var(--text); }
+  .profile-card-text { font-size: .83rem; color: var(--muted); line-height: 1.6; }
+
+  .traits-section { margin-bottom: 2rem; }
+  .traits-title {
+    font-size: .72rem; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .9rem;
+  }
+  .traits-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .trait-chip {
+    font-size: .78rem; font-weight: 600; padding: .35rem .8rem;
+    border-radius: 99px; border: 1px solid var(--border);
+    background: var(--card); color: #C4C8E0;
+  }
+
+  /* Error screen */
+  .error-wrap {
+    text-align: center; padding: 3rem 1rem;
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  }
+  .error-icon { font-size: 2.5rem; }
+  .error-title { font-size: 1.2rem; font-weight: 800; color: var(--D); }
+  .error-body  { font-size: .9rem; color: var(--muted); line-height: 1.65; max-width: 420px; }
+  .btn-back-intro {
+    margin-top: .5rem; background: none; border: 1.5px solid var(--border);
+    color: var(--muted); font-size: .85rem; font-weight: 600;
+    border-radius: 9px; padding: .7rem 1.4rem; cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .btn-back-intro:hover { color: var(--text); border-color: #3E4568; }
+
+  @media (max-width: 480px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .email-row { flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-primary, .btn-next, .option-btn, .progress-fill, .bar-fill, .spinner, .sending-spinner { animation: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-brand">
+    <div class="logo-mark">
+      <span class="lA"></span><span class="lB"></span>
+      <span class="lC"></span><span class="lD"></span>
+    </div>
+    <span class="site-name">Andrés Pardo Consultores</span>
+  </div>
+</header>
+
+<!-- INTRO -->
+<section class="section active" id="sec-intro">
+  <p class="intro-eyebrow">Evaluación de Perfil · Proceso de Selección</p>
+  <h1 class="intro-title">Cuéntanos cómo eres <em>en el trabajo</em></h1>
+  <p class="intro-body">
+    Esta evaluación es parte del proceso de selección de Andrés Pardo Consultores. Su propósito es entender tu estilo natural de comportamiento para determinar el ajuste entre tu perfil y el cargo al que postulas.
+  </p>
+  <p class="intro-body">No hay respuestas correctas ni incorrectas. Responde con lo primero que sientas — la espontaneidad es lo que hace válida la evaluación.</p>
+  <div class="warning-grid">
+    <div class="warn-card yellow">
+      <span class="warn-icon">⏱</span>
+      <span class="warn-text"><strong>Cada pregunta tiene 20 segundos.</strong> El tiempo corre desde que aparece la pregunta. Responde con tu primera impresión; si el tiempo se agota, la pregunta avanza automáticamente.</span>
+    </div>
+    <div class="warn-card red">
+      <span class="warn-icon">⚠️</span>
+      <span class="warn-text"><strong>Una vez iniciada, la evaluación debe completarse en una sola sesión.</strong> No puedes pausarla, retroceder ni cerrar la ventana. Asegúrate de tener <strong>10 minutos sin interrupciones</strong> antes de comenzar.</span>
+    </div>
+  </div>
+  <div class="email-form">
+    <label class="email-label" for="candidateEmail">Tu correo electrónico de postulación</label>
+    <div class="email-row">
+      <input type="email" id="candidateEmail" class="email-input"
+        placeholder="nombre@correo.com" autocomplete="email" spellcheck="false"/>
+      <button class="btn-primary" id="btnStart" onclick="tryStart()">
+        Comenzar
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <p class="email-error" id="emailError">Ingresa un correo válido para continuar.</p>
+  </div>
+</section>
+
+<!-- QUESTIONS -->
+<section class="section" id="sec-questions">
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span class="progress-label" id="progressLabel">Pregunta 1 de 20</span>
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer-ring-wrap">
+          <svg id="timerSvg" viewBox="0 0 36 36">
+            <circle id="timerTrack" cx="18" cy="18" r="15"/>
+            <circle id="timerArc"   cx="18" cy="18" r="15"/>
+          </svg>
+          <span class="timer-num" id="timerNum">20</span>
+        </div>
+        <span class="timer-label" id="timerLabel">seg</span>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <p class="question-label">Elige cómo te describes</p>
+  <h2 class="question-text" id="questionText">—</h2>
+  <p class="question-sub">Selecciona <strong>la que MÁS</strong> te identifica y <strong>la que MENOS</strong> te identifica.</p>
+  <div class="timeout-notice" id="timeoutNotice">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    Tiempo agotado — esta pregunta avanzó sin respuesta.
+  </div>
+  <div class="options-grid" id="optionsGrid"></div>
+  <div class="nav-row">
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+  </div>
+</section>
+
+<!-- SENDING -->
+<section class="section" id="sec-sending">
+  <div class="sending-wrap">
+    <div class="sending-spinner"></div>
+    <p class="sending-title">Guardando tu evaluación…</p>
+    <p class="sending-sub">Esto solo toma un momento.</p>
+  </div>
+</section>
+
+<!-- ERROR EMAIL NO ENCONTRADO -->
+<section class="section" id="sec-error">
+  <div class="error-wrap">
+    <span class="error-icon">✉️</span>
+    <p class="error-title">Correo no registrado</p>
+    <p class="error-body" id="errorMsg">
+      El correo ingresado no está asociado a ningún proceso de selección activo en Andrés Pardo Consultores.<br><br>
+      Verifica que estás usando el mismo correo con el que postulaste, o contáctanos para más información.
+    </p>
+    <button class="btn-back-intro" onclick="goBackToIntro()">← Intentar con otro correo</button>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section" id="sec-results">
+  <p class="results-eyebrow">Andrés Pardo Consultores · Resultado</p>
+  <h2 class="results-title" id="resultsTitle">—</h2>
+  <div class="results-candidate" id="resultsCandidate">—</div>
+  <p class="results-profile-label" id="resultsProfileLabel">—</p>
+
+  <div class="success-notice">
+    <span>✓</span>
+    <span><strong>Tu evaluación fue enviada exitosamente.</strong> El equipo de selección ya tiene acceso a tu perfil. No necesitas hacer ninguna otra acción.</span>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="radarCanvas" width="320" height="320"></canvas>
+  </div>
+  <div class="bars-section">
+    <p class="bars-title">Distribución del perfil</p>
+    <div id="barsContainer"></div>
+  </div>
+  <div class="profile-cards" id="profileCards"></div>
+  <div class="traits-section">
+    <p class="traits-title">Fortalezas características</p>
+    <div class="traits-grid" id="traitsGrid"></div>
+  </div>
+</section>
+
+<script>
+const TIMER_SECONDS = 20;
+const CIRCUMFERENCE = 2 * Math.PI * 15;
+
+const DIM_COLORS = { D: '#E8533A', I: '#F5A623', S: '#3DBFA8', C: '#6B8FFF' };
+const PROFILES = {
+  D: { name:"Estilo A", title:"El Ejecutor",
+    desc:"Orientado a la acción y los resultados, enfrenta los desafíos con determinación. Toma decisiones con rapidez, asume la autoridad cuando es necesario y no se detiene ante el fracaso. Su mayor fortaleza es convertir visión en resultados concretos.",
+    traits:["Decidido","Competitivo","Directo","Independiente","Resolutivo","Orientado a metas"] },
+  I: { name:"Estilo B", title:"El Inspirador",
+    desc:"Con una energía natural para conectar, es el motor emocional de cualquier equipo. Comunica con entusiasmo, persuade con historias y levanta el ánimo de quienes lo rodean. Su mayor fortaleza es movilizar personas hacia una visión compartida.",
+    traits:["Entusiasta","Persuasivo","Sociable","Optimista","Creativo","Empático"] },
+  S: { name:"Estilo C", title:"El Soporte",
+    desc:"Es el ancla de estabilidad que todo equipo necesita. Su constancia, paciencia y lealtad crean ambientes seguros donde las personas dan lo mejor de sí. Su mayor fortaleza es construir confianza sólida y sostener el trabajo colectivo en el tiempo.",
+    traits:["Paciente","Leal","Confiable","Colaborador","Empático","Constante"] },
+  C: { name:"Estilo D", title:"El Analista",
+    desc:"Su mente funciona con precisión y rigor. Antes de actuar, analiza; antes de concluir, verifica. Aporta la exactitud y el orden que transforman buenas ideas en sistemas que funcionan. Su mayor fortaleza es garantizar la calidad y la solidez de todo lo que toca.",
+    traits:["Preciso","Analítico","Sistemático","Organizado","Riguroso","Metódico"] }
+};
+
+const QUESTIONS = [
+  { text:"En el trabajo, tiendo a ser...", options:[
+    {word:"Decidido",    hint:"Tomo decisiones rápido y avanzo",          dim:"D"},
+    {word:"Entusiasta",  hint:"Contagio energía y animo a otros",          dim:"I"},
+    {word:"Paciente",    hint:"Escucho y apoyo antes de actuar",           dim:"S"},
+    {word:"Preciso",     hint:"Analizo bien antes de concluir",            dim:"C"}]},
+  { text:"Cuando enfrento un problema, mi primer instinto es...", options:[
+    {word:"Resolver",   hint:"Actuar directo y eliminar el obstáculo",     dim:"D"},
+    {word:"Conversar",  hint:"Hablar con otros para buscar ideas",         dim:"I"},
+    {word:"Meditar",    hint:"Pensar con calma y cuidar las relaciones",   dim:"S"},
+    {word:"Investigar", hint:"Recopilar datos antes de actuar",            dim:"C"}]},
+  { text:"Las personas cercanas me describirían como...", options:[
+    {word:"Directo",    hint:"Voy al grano sin rodeos",                    dim:"D"},
+    {word:"Optimista",  hint:"Veo el lado positivo de todo",               dim:"I"},
+    {word:"Leal",       hint:"Soy constante y de fiar",                    dim:"S"},
+    {word:"Analítico",  hint:"Pienso antes de hablar",                     dim:"C"}]},
+  { text:"En reuniones y trabajo en equipo, prefiero...", options:[
+    {word:"Liderar",    hint:"Dar dirección y marcar el rumbo",            dim:"D"},
+    {word:"Motivar",    hint:"Generar entusiasmo y cohesión",              dim:"I"},
+    {word:"Colaborar",  hint:"Apoyar y mantener el ambiente positivo",     dim:"S"},
+    {word:"Planificar", hint:"Estructurar y asegurar la calidad",          dim:"C"}]},
+  { text:"Mi mayor fortaleza profesional es...", options:[
+    {word:"Iniciativa",    hint:"Empujo proyectos hacia adelante",         dim:"D"},
+    {word:"Persuasión",    hint:"Convenzo e inspiro a otros",              dim:"I"},
+    {word:"Confiabilidad", hint:"Cumplo siempre lo que prometo",           dim:"S"},
+    {word:"Rigor",         hint:"Trabajo con alta precisión y detalle",    dim:"C"}]},
+  { text:"Cuando el ritmo de trabajo aumenta, yo...", options:[
+    {word:"Acelero",          hint:"Me energizo con la presión",           dim:"D"},
+    {word:"Improviso",        hint:"Adapto mis ideas sobre la marcha",     dim:"I"},
+    {word:"Mantengo el foco", hint:"Sigo constante y sin agitarme",        dim:"S"},
+    {word:"Verifico",         hint:"Me aseguro de no cometer errores",     dim:"C"}]},
+  { text:"En mi estilo de comunicación, tiendo a ser...", options:[
+    {word:"Conciso",      hint:"Voy al punto, sin adornos",                dim:"D"},
+    {word:"Expresivo",    hint:"Uso emociones e historias para conectar",  dim:"I"},
+    {word:"Empático",     hint:"Escucho y valido antes de responder",      dim:"S"},
+    {word:"Estructurado", hint:"Organizo mis ideas con lógica",            dim:"C"}]},
+  { text:"Mi actitud ante el cambio y la incertidumbre es...", options:[
+    {word:"Lo asumo",  hint:"Veo el cambio como oportunidad",              dim:"D"},
+    {word:"Lo abrazo", hint:"Me emociona lo nuevo y diferente",            dim:"I"},
+    {word:"Me adapto", hint:"Prefiero el ritmo gradual y seguro",          dim:"S"},
+    {word:"Lo evalúo", hint:"Analizo riesgos antes de moverme",            dim:"C"}]},
+  { text:"Lo que más me frustra en el trabajo es...", options:[
+    {word:"La lentitud",    hint:"Cuando no se avanza ni se decide",       dim:"D"},
+    {word:"La rigidez",     hint:"Reglas sin espacio para la creatividad", dim:"I"},
+    {word:"El conflicto",   hint:"Cuando el equipo no trabaja en armonía", dim:"S"},
+    {word:"La imprecisión", hint:"Cuando faltan datos o hay errores",      dim:"C"}]},
+  { text:"Al tomar decisiones importantes, yo...", options:[
+    {word:"Decido rápido",  hint:"Confío en mi intuición y actúo",         dim:"D"},
+    {word:"Consulto",       hint:"Busco perspectivas y aprobación",        dim:"I"},
+    {word:"Tomo mi tiempo", hint:"Me aseguro de no afectar a nadie",       dim:"S"},
+    {word:"Analizo datos",  hint:"Recopilo hechos y sigo un proceso",      dim:"C"}]},
+  { text:"Mi forma de motivarme es...", options:[
+    {word:"Superar retos",  hint:"Los obstáculos me activan",              dim:"D"},
+    {word:"Reconocimiento", hint:"Que valoren y vean mi aporte",           dim:"I"},
+    {word:"Estabilidad",    hint:"Saber que mi equipo está bien",          dim:"S"},
+    {word:"Excelencia",     hint:"Entregar el mejor resultado posible",    dim:"C"}]},
+  { text:"Cuando trabajo en equipo, mi rol natural es...", options:[
+    {word:"Capitán",      hint:"Marco la dirección y empujo el ritmo",     dim:"D"},
+    {word:"Animador",     hint:"Subo el ánimo y mantengo la energía",      dim:"I"},
+    {word:"Apoyo",        hint:"Ayudo donde más se necesita",              dim:"S"},
+    {word:"Especialista", hint:"Profundizo y cuido los detalles técnicos", dim:"C"}]},
+  { text:"Al recibir feedback, prefiero que sea...", options:[
+    {word:"Directo",   hint:"Sin rodeos, al punto",                        dim:"D"},
+    {word:"Motivador", hint:"Que resalte lo positivo y me anime",          dim:"I"},
+    {word:"Sensible",  hint:"Con tacto, cuidando cómo me afecta",          dim:"S"},
+    {word:"Detallado", hint:"Con ejemplos concretos y datos",              dim:"C"}]},
+  { text:"En situaciones de estrés, tiendo a...", options:[
+    {word:"Tomar control", hint:"Asumo el mando para resolver",            dim:"D"},
+    {word:"Hablar más",    hint:"Busco compañía y me expreso",             dim:"I"},
+    {word:"Calmarme",      hint:"Trato de mantener la estabilidad",        dim:"S"},
+    {word:"Analizar más",  hint:"Reviso y reviso para no errar",           dim:"C"}]},
+  { text:"Mi ambiente de trabajo ideal es...", options:[
+    {word:"Dinámico",   hint:"Con variedad, retos y libertad para actuar", dim:"D"},
+    {word:"Social",     hint:"Con mucha gente, creatividad y movimiento",  dim:"I"},
+    {word:"Armónico",   hint:"Con relaciones sanas y rutinas claras",      dim:"S"},
+    {word:"Organizado", hint:"Con procesos, estándares y orden",           dim:"C"}]},
+  { text:"Cuando presento un proyecto, pongo énfasis en...", options:[
+    {word:"Los resultados", hint:"Qué logramos y en cuánto tiempo",        dim:"D"},
+    {word:"La visión",      hint:"El impacto y la emoción que genera",     dim:"I"},
+    {word:"El proceso",     hint:"Cómo el equipo trabajó en conjunto",     dim:"S"},
+    {word:"Los datos",      hint:"Los análisis y la evidencia",            dim:"C"}]},
+  { text:"Ante las reglas y procedimientos, mi actitud es...", options:[
+    {word:"Las desafío", hint:"Si no sirven al resultado, las cuestiono",  dim:"D"},
+    {word:"Las negocio", hint:"Busco la manera de adaptarlas",             dim:"I"},
+    {word:"Las respeto", hint:"Las sigo porque dan estabilidad",           dim:"S"},
+    {word:"Las mejoro",  hint:"Las analizo para hacerlas más eficientes",  dim:"C"}]},
+  { text:"Me siento en mi mejor versión cuando...", options:[
+    {word:"Gano",        hint:"Logro metas y supero mis propios récords",  dim:"D"},
+    {word:"Conecto",     hint:"Construyo relaciones y genero entusiasmo",  dim:"I"},
+    {word:"Contribuyo",  hint:"Mi aporte hace la diferencia al equipo",    dim:"S"},
+    {word:"Perfecciono", hint:"Entrego algo con el más alto estándar",     dim:"C"}]},
+  { text:"Mi relación con los plazos y compromisos es...", options:[
+    {word:"Urgente",   hint:"Me activa la presión del límite de tiempo",   dim:"D"},
+    {word:"Flexible",  hint:"Si hay razón, ajusto sin problema",           dim:"I"},
+    {word:"Confiable", hint:"Cumplo siempre aunque me cueste",             dim:"S"},
+    {word:"Metódico",  hint:"Planifico para no llegar a última hora",      dim:"C"}]},
+  { text:"Cuando alguien me da una instrucción ambigua, yo...", options:[
+    {word:"Actúo",     hint:"Interpreto y me muevo de inmediato",          dim:"D"},
+    {word:"Pregunto",  hint:"Busco conversar y aclarar",                   dim:"I"},
+    {word:"Espero",    hint:"Prefiero tener certeza antes de moverme",     dim:"S"},
+    {word:"Investigo", hint:"Busco más información para entender bien",    dim:"C"}]},
+];
+
+// ── State ──────────────────────────────────────────────────────
+let current = 0, answers = [], timerInterval = null, timeLeft = 0;
+let timedOut = false, inTest = false, candidateEmail = '';
+
+window.addEventListener('beforeunload', e => {
+  if (inTest) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ── Email ──────────────────────────────────────────────────────
+function tryStart() {
+  const input = document.getElementById('candidateEmail');
+  const error = document.getElementById('emailError');
+  const val   = input.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+    input.classList.add('error'); error.classList.add('visible'); input.focus(); return;
+  }
+  input.classList.remove('error'); error.classList.remove('visible');
+  candidateEmail = val;
+  startAssessment();
+}
+document.getElementById('candidateEmail').addEventListener('keydown', e => { if (e.key === 'Enter') tryStart(); });
+document.getElementById('candidateEmail').addEventListener('input', () => {
+  document.getElementById('candidateEmail').classList.remove('error');
+  document.getElementById('emailError').classList.remove('visible');
+});
+
+// ── Timer ──────────────────────────────────────────────────────
+function initTimerSvg() {
+  const arc = document.getElementById('timerArc');
+  arc.style.strokeDasharray = CIRCUMFERENCE; arc.style.strokeDashoffset = 0;
+}
+function startTimer() {
+  clearTimer(); timeLeft = TIMER_SECONDS; timedOut = false;
+  document.getElementById('timeoutNotice').classList.remove('visible');
+  const arc = document.getElementById('timerArc');
+  const numEl = document.getElementById('timerNum');
+  const wrap  = document.getElementById('timerWrap');
+  arc.style.transition = 'none'; arc.style.strokeDashoffset = 0;
+  numEl.textContent = TIMER_SECONDS; wrap.className = 'timer-wrap';
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    numEl.textContent = timeLeft;
+    arc.style.transition = 'stroke-dashoffset .9s linear, stroke .3s';
+    arc.style.strokeDashoffset = CIRCUMFERENCE * (1 - timeLeft / TIMER_SECONDS);
+    if (timeLeft <= 5)       wrap.className = 'timer-wrap danger';
+    else if (timeLeft <= 10) wrap.className = 'timer-wrap warn';
+    if (timeLeft <= 0) { clearTimer(); onTimeout(); }
+  }, 1000);
+}
+function clearTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+function onTimeout() {
+  timedOut = true;
+  document.getElementById('timeoutNotice').classList.add('visible');
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('locked'));
+  setTimeout(() => {
+    if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
+    else submitResults();
+  }, 1800);
+}
+
+// ── Flow ───────────────────────────────────────────────────────
+function startAssessment() {
+  current = 0; answers = QUESTIONS.map(() => ({ most: null, least: null }));
+  inTest = true;
+  showSection('sec-questions'); initTimerSvg(); renderQuestion();
+}
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goBackToIntro() { inTest = false; showSection('sec-intro'); }
+
+// ── Render ─────────────────────────────────────────────────────
+function renderQuestion() {
+  clearTimer(); timedOut = false;
+  document.getElementById('timeoutNotice').classList.remove('visible');
+  const q = QUESTIONS[current], a = answers[current];
+  document.getElementById('progressLabel').textContent = `Pregunta ${current + 1} de ${QUESTIONS.length}`;
+  document.getElementById('progressFill').style.width  = `${Math.round(current / QUESTIONS.length * 100)}%`;
+  document.getElementById('questionText').textContent  = q.text;
+  renderOptions(q, a); updateNextBtn(); startTimer();
+}
+function renderOptions(q, a) {
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    if (a.most === opt.dim) btn.classList.add('selected-most');
+    else if (a.least === opt.dim) btn.classList.add('selected-least');
+    btn.innerHTML = `
+      <span class="option-word">${opt.word}</span>
+      <span class="option-hint">${opt.hint}</span>
+      ${a.most  === opt.dim ? '<span class="option-badge badge-most">Más</span>'   : ''}
+      ${a.least === opt.dim ? '<span class="option-badge badge-least">Menos</span>' : ''}
+    `;
+    btn.addEventListener('click', () => selectOption(opt.dim));
+    grid.appendChild(btn);
+  });
+}
+function selectOption(dim) {
+  if (timedOut) return;
+  const a = answers[current];
+  if      (a.most === null)  a.most  = dim;
+  else if (a.most === dim)   a.most  = null;
+  else if (a.least === dim)  a.least = null;
+  else if (a.least === null) a.least = dim;
+  else                       a.least = dim;
+  renderOptions(QUESTIONS[current], a); updateNextBtn();
+}
+function updateNextBtn() {
+  const a = answers[current], btn = document.getElementById('btnNext');
+  btn.classList.toggle('ready', !!(a.most && a.least && a.most !== a.least));
+  btn.textContent = current === QUESTIONS.length - 1 ? 'Finalizar →' : 'Siguiente →';
+}
+function nextQuestion() {
+  const a = answers[current];
+  if (!a.most || !a.least || a.most === a.least) return;
+  clearTimer();
+  if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
+  else submitResults();
+}
+
+// ── Scoring ────────────────────────────────────────────────────
+function calcScores() {
+  const raw = { D:0, I:0, S:0, C:0 };
+  answers.forEach(a => {
+    if (a.most)  raw[a.most]  += 2;
+    if (a.least) raw[a.least] -= 1;
+  });
+  const vals = Object.values(raw);
+  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
+  const norm = {};
+  for (const k in raw) norm[k] = Math.round(((raw[k] - min) / range) * 100);
+  return { raw, norm };
+}
+
+// ── Submit ─────────────────────────────────────────────────────
+async function submitResults() {
+  clearTimer();
+  showSection('sec-sending');
+
+  const { raw, norm } = calcScores();
+  const sorted = Object.entries(norm).sort((a, b) => b[1] - a[1]);
+  const [primary, secondary] = sorted;
+  const allTraits = [...new Set([
+    ...PROFILES[primary[0]].traits,
+    ...PROFILES[secondary[0]].traits.slice(0, 3)
+  ])].slice(0, 9);
+
+  const payload = {
+    email: candidateEmail,
+    scores: raw,
+    norm,
+    perfil_predominante: PROFILES[primary[0]].name,
+    perfil_complementario: PROFILES[secondary[0]].name,
+    titulo: PROFILES[primary[0]].title,
+    traits: allTraits,
+  };
+
+  try {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.status === 404) {
+      inTest = false;
+      showSection('sec-error');
+      return;
+    }
+    if (!res.ok) throw new Error(data.error || 'Error desconocido');
+
+    inTest = false;
+    showResults(norm, sorted, allTraits, data.nombre);
+  } catch (err) {
+    console.error(err);
+    inTest = false;
+    showSection('sec-error');
+    document.getElementById('errorMsg').textContent =
+      'Ocurrió un error al guardar tu evaluación. Por favor intenta nuevamente o contacta al equipo de selección.';
+  }
+}
+
+// ── Show Results ───────────────────────────────────────────────
+function showResults(norm, sorted, allTraits, nombre) {
+  showSection('sec-results');
+  const [primary, secondary] = sorted;
+
+  document.getElementById('resultsTitle').textContent = PROFILES[primary[0]].title;
+  document.getElementById('resultsCandidate').textContent = nombre || candidateEmail;
+  document.getElementById('resultsProfileLabel').textContent =
+    `Perfil predominante: ${PROFILES[primary[0]].name} · Complementario: ${PROFILES[secondary[0]].name}`;
+
+  const barsEl = document.getElementById('barsContainer');
+  barsEl.innerHTML = '';
+  sorted.forEach(([dim, pct]) => {
+    barsEl.innerHTML += `<div class="bar-row">
+      <span class="bar-label">${PROFILES[dim].name}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${DIM_COLORS[dim]}"></div></div>
+      <span class="bar-pct" style="color:${DIM_COLORS[dim]}">${pct}%</span>
+    </div>`;
+  });
+
+  const cardsEl = document.getElementById('profileCards');
+  cardsEl.innerHTML = '';
+  sorted.forEach(([dim], idx) => {
+    const p = PROFILES[dim];
+    const cls = idx===0?'dominant':idx===1?'secondary':'';
+    const tag = idx===0?'Predominante':idx===1?'Complementario':'';
+    cardsEl.innerHTML += `<div class="profile-card ${cls}" style="border-left-color:${DIM_COLORS[dim]}">
+      <div class="profile-card-header">
+        <div class="profile-card-dot" style="background:${DIM_COLORS[dim]}"></div>
+        <span class="profile-card-name">${p.name} — "${p.title}"</span>
+        ${tag?`<span class="profile-card-tag">${tag}</span>`:''}
+      </div>
+      <p class="profile-card-text">${p.desc}</p>
+    </div>`;
+  });
+
+  document.getElementById('traitsGrid').innerHTML =
+    allTraits.map(t => `<span class="trait-chip">${t}</span>`).join('');
+
+  setTimeout(() => drawRadar(norm), 50);
+}
+
+// ── Radar ──────────────────────────────────────────────────────
+function drawRadar(norm) {
+  const canvas = document.getElementById('radarCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const size = Math.min(canvas.parentElement.clientWidth - 48, 320);
+  canvas.style.width = size+'px'; canvas.style.height = size+'px';
+  canvas.width = size*dpr; canvas.height = size*dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  const cx=size/2, cy=size/2, r=size*0.38;
+  const dims=['D','I','S','C'];
+  const angles=dims.map((_,i)=>(i/4)*Math.PI*2-Math.PI/2);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(f=>{
+    ctx.beginPath();
+    dims.forEach((_,i)=>{const x=cx+Math.cos(angles[i])*r*f,y=cy+Math.sin(angles[i])*r*f;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.closePath(); ctx.stroke();
+  });
+  dims.forEach((_,i)=>{ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(angles[i])*r,cy+Math.sin(angles[i])*r);ctx.stroke();});
+  const values=dims.map(d=>norm[d]/100);
+  ctx.beginPath();
+  dims.forEach((dim,i)=>{const x=cx+Math.cos(angles[i])*r*values[i],y=cy+Math.sin(angles[i])*r*values[i];i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.closePath();
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  grad.addColorStop(0,'rgba(107,143,255,0.35)');grad.addColorStop(1,'rgba(232,83,58,0.18)');
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.strokeStyle='rgba(238,240,248,0.5)';ctx.lineWidth=1.5;ctx.stroke();
+  dims.forEach((dim,i)=>{const x=cx+Math.cos(angles[i])*r*values[i],y=cy+Math.sin(angles[i])*r*values[i];ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle=DIM_COLORS[dim];ctx.fill();});
+  const lR=r+24, labels={D:'A',I:'B',S:'C',C:'D'};
+  ctx.font=`bold ${Math.round(size*0.05)}px 'Segoe UI',system-ui,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  dims.forEach((dim,i)=>{const x=cx+Math.cos(angles[i])*lR,y=cy+Math.sin(angles[i])*lR;ctx.fillStyle=DIM_COLORS[dim];ctx.fillText(labels[dim],x,y);});
+}
+</script>
+</body>
+</html>
