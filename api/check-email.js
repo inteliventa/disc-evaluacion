@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   // 1. Buscar candidato por email
   const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/candidatos?email=eq.${encodeURIComponent(email)}&select=id,nombre,tiene_disc`,
+    `${SUPABASE_URL}/rest/v1/candidatos?email=eq.${encodeURIComponent(email)}&select=id,nombre,tiene_disc,disc_fecha`,
     { headers: { Authorization: `Bearer ${SUPABASE_KEY}`, apikey: SUPABASE_KEY } }
   );
 
@@ -28,6 +28,10 @@ export default async function handler(req, res) {
 
   if (candidato.tiene_disc) {
     return res.status(409).json({ error: 'ya_completado', nombre: candidato.nombre });
+  }
+
+  if (candidato.disc_fecha) {
+    return res.status(410).json({ error: 'abandonado', nombre: candidato.nombre });
   }
 
   // 2. Verificar que tiene el DISC asignado en alguna postulación

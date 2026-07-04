@@ -601,6 +601,15 @@ async function tryStart() {
       return;
     }
 
+    if (res.status === 410) {
+      showErrorScreen(
+        '🔒', 'Evaluación no disponible',
+        'Ya iniciaste esta evaluación y no fue completada. Por política, no es posible reiniciarla.<br><br>Contacta al equipo de selección si necesitas asistencia.',
+        false
+      );
+      return;
+    }
+
     if (res.status === 403) {
       showErrorScreen(
         '🔒', 'Evaluación no asignada',
@@ -675,10 +684,15 @@ function onTimeout() {
 }
 
 // ── Flow ───────────────────────────────────────────────────────
-function startAssessment() {
+async function startAssessment() {
   current = 0; answers = QUESTIONS.map(() => ({ most: null, least: null }));
   inTest = true;
   localStorage.setItem('disc_in_progress', candidateEmail);
+  await fetch('/api/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: candidateEmail }),
+  }).catch(() => {});
   showSection('sec-questions'); initTimerSvg(); renderQuestion();
 }
 function showSection(id) {
