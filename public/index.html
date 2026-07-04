@@ -363,7 +363,6 @@
   </div>
   <div class="options-grid" id="optionsGrid"></div>
   <div class="nav-row">
-    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
   </div>
 </section>
 
@@ -546,6 +545,20 @@ window.addEventListener('beforeunload', e => {
   if (inTest) { e.preventDefault(); e.returnValue = ''; }
 });
 
+// Bloquear re-ingreso si abandonó el test a mitad
+(function checkAbandoned() {
+  const abandoned = localStorage.getItem('disc_in_progress');
+  if (abandoned) {
+    document.addEventListener('DOMContentLoaded', () => {
+      showErrorScreen(
+        '⚠️', 'Evaluación no disponible',
+        'Iniciaste esta evaluación y la abandonaste antes de terminarla. Por política, no es posible reiniciarla.<br><br>Contacta al equipo de selección si necesitas asistencia.',
+        false
+      );
+    });
+  }
+})();
+
 // ── Email ──────────────────────────────────────────────────────
 async function tryStart() {
   const input  = document.getElementById('candidateEmail');
@@ -665,6 +678,7 @@ function onTimeout() {
 function startAssessment() {
   current = 0; answers = QUESTIONS.map(() => ({ most: null, least: null }));
   inTest = true;
+  localStorage.setItem('disc_in_progress', candidateEmail);
   showSection('sec-questions'); initTimerSvg(); renderQuestion();
 }
 function showSection(id) {
@@ -780,6 +794,7 @@ async function submitResults() {
     if (!res.ok) throw new Error(data.error || 'Error desconocido');
 
     inTest = false;
+    localStorage.removeItem('disc_in_progress');
     showResults(norm, sorted, allTraits, data.nombre);
   } catch (err) {
     console.error(err);
