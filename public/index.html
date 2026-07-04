@@ -728,11 +728,7 @@ function selectOption(dim) {
     setTimeout(nextQuestion, 600);
   }
 }
-function updateNextBtn() {
-  const a = answers[current], btn = document.getElementById('btnNext');
-  btn.classList.toggle('ready', !!(a.most && a.least && a.most !== a.least));
-  btn.textContent = current === QUESTIONS.length - 1 ? 'Finalizar →' : 'Siguiente →';
-}
+function updateNextBtn() {}
 function nextQuestion() {
   const a = answers[current];
   if (!a.most || !a.least || a.most === a.least) return;
