@@ -588,6 +588,15 @@ async function tryStart() {
       return;
     }
 
+    if (res.status === 403) {
+      showErrorScreen(
+        '🔒', 'Evaluación no asignada',
+        'El equipo de selección aún no ha habilitado esta evaluación para tu postulación.<br><br>Si crees que esto es un error, contáctanos para más información.',
+        true
+      );
+      return;
+    }
+
     if (!res.ok) throw new Error('Error de servidor');
 
     candidateEmail = val;

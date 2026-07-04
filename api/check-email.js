@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email requerido' });
 
-  // Verificar si ya completó el test
+  // 1. Buscar candidato por email
   const r = await fetch(
     `${SUPABASE_URL}/rest/v1/candidatos?email=eq.${encodeURIComponent(email)}&select=id,nombre,tiene_disc`,
     { headers: { Authorization: `Bearer ${SUPABASE_KEY}`, apikey: SUPABASE_KEY } }
@@ -24,9 +24,23 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'no_encontrado' });
   }
 
-  if (rows[0].tiene_disc) {
-    return res.status(409).json({ error: 'ya_completado', nombre: rows[0].nombre });
+  const candidato = rows[0];
+
+  if (candidato.tiene_disc) {
+    return res.status(409).json({ error: 'ya_completado', nombre: candidato.nombre });
   }
 
-  return res.status(200).json({ ok: true, nombre: rows[0].nombre });
+  // 2. Verificar que tiene el DISC asignado en alguna postulación
+  const rPost = await fetch(
+    `${SUPABASE_URL}/rest/v1/postulaciones?candidato_id=eq.${candidato.id}&disc_solicitado=eq.true&select=id&limit=1`,
+    { headers: { Authorization: `Bearer ${SUPABASE_KEY}`, apikey: SUPABASE_KEY } }
+  );
+
+  const postulaciones = await rPost.json();
+
+  if (!Array.isArray(postulaciones) || postulaciones.length === 0) {
+    return res.status(403).json({ error: 'no_asignado' });
+  }
+
+  return res.status(200).json({ ok: true, nombre: candidato.nombre });
 }
