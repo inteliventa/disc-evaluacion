@@ -553,7 +553,7 @@ window.addEventListener('beforeunload', e => {
       showErrorScreen(
         '⚠️', 'Evaluación no disponible',
         'Iniciaste esta evaluación y la abandonaste antes de terminarla. Por política, no es posible reiniciarla.<br><br>Contacta al equipo de selección si necesitas asistencia.',
-        false
+        true
       );
     });
   }
@@ -685,7 +685,7 @@ function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function goBackToIntro() { inTest = false; showSection('sec-intro'); }
+function goBackToIntro() { inTest = false; localStorage.removeItem('disc_in_progress'); showSection('sec-intro'); }
 
 // ── Render ─────────────────────────────────────────────────────
 function renderQuestion() {
