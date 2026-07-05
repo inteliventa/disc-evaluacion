@@ -708,7 +708,6 @@ function renderOptions(q, a) {
     if (a.most === opt.dim) btn.classList.add('selected-most');
     else if (a.least === opt.dim) btn.classList.add('selected-least');
     btn.innerHTML = `
-      <span class="option-word">${opt.word}</span>
       <span class="option-hint">${opt.hint}</span>
       ${a.most  === opt.dim ? '<span class="option-badge badge-most">Más</span>'   : ''}
       ${a.least === opt.dim ? '<span class="option-badge badge-least">Menos</span>' : ''}
