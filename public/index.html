@@ -304,14 +304,25 @@
   </div>
 </header>
 
-<!-- INTRO -->
-<section class="section active" id="sec-intro">
+<!-- INTRO PASO 1 -->
+<section class="section active" id="sec-intro-1">
   <p class="intro-eyebrow">Evaluación de Perfil · Proceso de Selección</p>
   <h1 class="intro-title">Cuéntanos cómo eres <em>en el trabajo</em></h1>
   <p class="intro-body">
     Esta evaluación es parte del proceso de selección de Andrés Pardo Consultores. Su propósito es entender tu estilo natural de comportamiento para determinar el ajuste entre tu perfil y el cargo al que postulas.
   </p>
   <p class="intro-body">No hay respuestas correctas ni incorrectas. Responde con lo primero que sientas — la espontaneidad es lo que hace válida la evaluación.</p>
+  <div style="margin-top:2rem;">
+    <button class="btn-primary" onclick="showSection('sec-intro-2')">
+      Siguiente
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- INTRO PASO 2 -->
+<section class="section" id="sec-intro-2">
+  <p class="intro-eyebrow">Antes de comenzar</p>
   <div class="warning-grid">
     <div class="warn-card yellow">
       <span class="warn-icon">⏱</span>
@@ -322,6 +333,19 @@
       <span class="warn-text"><strong>Una vez iniciada, la evaluación debe completarse en una sola sesión.</strong> No puedes pausarla, retroceder ni cerrar la ventana. Asegúrate de tener <strong>10 minutos sin interrupciones</strong> antes de comenzar.</span>
     </div>
   </div>
+  <div style="margin-top:2rem;">
+    <button class="btn-primary" onclick="showSection('sec-intro-3')">
+      Entendido, continuar
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- INTRO PASO 3: EMAIL -->
+<section class="section" id="sec-intro-3">
+  <p class="intro-eyebrow">Ingresa tu correo para comenzar</p>
+  <h1 class="intro-title" style="font-size:1.6rem;">Identifica tu postulación</h1>
+  <p class="intro-body">Ingresa el correo electrónico con el que postulaste. Esto vincula tu evaluación a tu proceso de selección.</p>
   <div class="email-form">
     <label class="email-label" for="candidateEmail">Tu correo electrónico de postulación</label>
     <div class="email-row">
@@ -687,7 +711,7 @@ function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function goBackToIntro() { inTest = false; localStorage.removeItem('disc_in_progress'); showSection('sec-intro'); }
+function goBackToIntro() { inTest = false; localStorage.removeItem('disc_in_progress'); showSection('sec-intro-3'); }
 
 // ── Render ─────────────────────────────────────────────────────
 function renderQuestion() {
