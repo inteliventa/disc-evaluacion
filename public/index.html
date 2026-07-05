@@ -389,29 +389,15 @@
 </section>
 
 <!-- RESULTS -->
-<section class="section" id="sec-results">
-  <p class="results-eyebrow">Andrés Pardo Consultores · Resultado</p>
-  <h2 class="results-title" id="resultsTitle">—</h2>
-  <div class="results-candidate" id="resultsCandidate">—</div>
-  <p class="results-profile-label" id="resultsProfileLabel">—</p>
-
-  <div class="success-notice">
-    <span>✓</span>
-    <span><strong>Tu evaluación fue enviada exitosamente.</strong> El equipo de selección ya tiene acceso a tu perfil. No necesitas hacer ninguna otra acción.</span>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="radarCanvas" width="320" height="320"></canvas>
-  </div>
-  <div class="bars-section">
-    <p class="bars-title">Distribución del perfil</p>
-    <div id="barsContainer"></div>
-  </div>
-  <div class="profile-cards" id="profileCards"></div>
-  <div class="traits-section">
-    <p class="traits-title">Fortalezas características</p>
-    <div class="traits-grid" id="traitsGrid"></div>
-  </div>
+<section class="section" id="sec-results" style="text-align:center; padding: 3rem 1.5rem;">
+  <div style="font-size: 3rem; margin-bottom: 1.5rem;">✅</div>
+  <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem;" id="resultsCandidate">—</h2>
+  <p style="font-size: 1.1rem; color: var(--muted); max-width: 480px; margin: 0 auto 1.5rem;">
+    Gracias por completar la evaluación. Tus respuestas han sido registradas exitosamente.
+  </p>
+  <p style="font-size: 0.95rem; color: var(--muted); max-width: 480px; margin: 0 auto;">
+    El equipo de Andrés Pardo Consultores las revisará en el marco del proceso de selección. No necesitas realizar ninguna otra acción.
+  </p>
 </section>
 
 <script>
@@ -824,43 +810,8 @@ async function submitResults() {
 // ── Show Results ───────────────────────────────────────────────
 function showResults(norm, sorted, allTraits, nombre) {
   showSection('sec-results');
-  const [primary, secondary] = sorted;
-
-  document.getElementById('resultsTitle').textContent = PROFILES[primary[0]].title;
-  document.getElementById('resultsCandidate').textContent = nombre || candidateEmail;
-  document.getElementById('resultsProfileLabel').textContent =
-    `Perfil predominante: ${PROFILES[primary[0]].name} · Complementario: ${PROFILES[secondary[0]].name}`;
-
-  const barsEl = document.getElementById('barsContainer');
-  barsEl.innerHTML = '';
-  sorted.forEach(([dim, pct]) => {
-    barsEl.innerHTML += `<div class="bar-row">
-      <span class="bar-label">${PROFILES[dim].name}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${DIM_COLORS[dim]}"></div></div>
-      <span class="bar-pct" style="color:${DIM_COLORS[dim]}">${pct}%</span>
-    </div>`;
-  });
-
-  const cardsEl = document.getElementById('profileCards');
-  cardsEl.innerHTML = '';
-  sorted.forEach(([dim], idx) => {
-    const p = PROFILES[dim];
-    const cls = idx===0?'dominant':idx===1?'secondary':'';
-    const tag = idx===0?'Predominante':idx===1?'Complementario':'';
-    cardsEl.innerHTML += `<div class="profile-card ${cls}" style="border-left-color:${DIM_COLORS[dim]}">
-      <div class="profile-card-header">
-        <div class="profile-card-dot" style="background:${DIM_COLORS[dim]}"></div>
-        <span class="profile-card-name">${p.name} — "${p.title}"</span>
-        ${tag?`<span class="profile-card-tag">${tag}</span>`:''}
-      </div>
-      <p class="profile-card-text">${p.desc}</p>
-    </div>`;
-  });
-
-  document.getElementById('traitsGrid').innerHTML =
-    allTraits.map(t => `<span class="trait-chip">${t}</span>`).join('');
-
-  setTimeout(() => drawRadar(norm), 50);
+  const firstName = (nombre || candidateEmail).split(' ')[0];
+  document.getElementById('resultsCandidate').textContent = `Gracias, ${firstName}`;
 }
 
 // ── Radar ──────────────────────────────────────────────────────
