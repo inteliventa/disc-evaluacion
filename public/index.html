@@ -540,6 +540,7 @@ const QUESTIONS = [
 // ── State ──────────────────────────────────────────────────────
 let current = 0, answers = [], timerInterval = null, timeLeft = 0;
 let timedOut = false, inTest = false, candidateEmail = '';
+let testStartTime = 0, questionStartTime = 0, answerTimes = [];
 
 window.addEventListener('beforeunload', e => {
   if (inTest) { e.preventDefault(); e.returnValue = ''; }
@@ -675,6 +676,7 @@ function startTimer() {
 function clearTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
 function onTimeout() {
   timedOut = true;
+  answerTimes[current] = TIMER_SECONDS;
   document.getElementById('timeoutNotice').classList.add('visible');
   document.querySelectorAll('.option-btn').forEach(b => b.classList.add('locked'));
   setTimeout(() => {
@@ -686,7 +688,7 @@ function onTimeout() {
 // ── Flow ───────────────────────────────────────────────────────
 async function startAssessment() {
   current = 0; answers = QUESTIONS.map(() => ({ most: null, least: null }));
-  inTest = true;
+  inTest = true; testStartTime = Date.now(); answerTimes = [];
   localStorage.setItem('disc_in_progress', candidateEmail);
   await fetch('/api/start', {
     method: 'POST',
@@ -703,7 +705,7 @@ function goBackToIntro() { inTest = false; localStorage.removeItem('disc_in_prog
 
 // ── Render ─────────────────────────────────────────────────────
 function renderQuestion() {
-  clearTimer(); timedOut = false;
+  clearTimer(); timedOut = false; questionStartTime = Date.now();
   document.getElementById('timeoutNotice').classList.remove('visible');
   const q = QUESTIONS[current], a = answers[current];
   document.getElementById('progressLabel').textContent = `Pregunta ${current + 1} de ${QUESTIONS.length}`;
@@ -746,6 +748,7 @@ function updateNextBtn() {}
 function nextQuestion() {
   const a = answers[current];
   if (!a.most || !a.least || a.most === a.least) return;
+  answerTimes[current] = Math.round((Date.now() - questionStartTime) / 1000);
   clearTimer();
   if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
   else submitResults();
@@ -778,6 +781,7 @@ async function submitResults() {
     ...PROFILES[secondary[0]].traits.slice(0, 3)
   ])].slice(0, 9);
 
+  const duracion_total_seg = Math.round((Date.now() - testStartTime) / 1000);
   const payload = {
     email: candidateEmail,
     scores: raw,
@@ -786,6 +790,8 @@ async function submitResults() {
     perfil_complementario: PROFILES[secondary[0]].name,
     titulo: PROFILES[primary[0]].title,
     traits: allTraits,
+    duracion_total_seg,
+    tiempos_por_pregunta: answerTimes,
   };
 
   try {

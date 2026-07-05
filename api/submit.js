@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  const { email, scores, norm, perfil_predominante, perfil_complementario, titulo, traits } = req.body;
+  const { email, scores, norm, perfil_predominante, perfil_complementario, titulo, traits, duracion_total_seg, tiempos_por_pregunta } = req.body;
 
   if (!email || !scores) {
     return res.status(400).json({ error: 'Datos incompletos' });
@@ -43,6 +43,8 @@ export default async function handler(req, res) {
     scores,
     norm,
     traits,
+    duracion_total_seg,
+    tiempos_por_pregunta,
     completado_en: new Date().toISOString(),
   };
 
