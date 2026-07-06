@@ -35,6 +35,39 @@ export default async function handler(req, res) {
     });
   }
 
+  // Generar interpretación narrativa con Claude
+  let interpretacion = null;
+  try {
+    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: `Eres un experto en perfiles conductuales DISC. Redacta una interpretación narrativa breve (3-4 párrafos) para la siguiente evaluación. Escribe en español, en tercera persona, sin mencionar cargos específicos. Enfócate en: cómo se comporta esta persona, cómo se comunica, cómo toma decisiones, cómo reacciona bajo presión, y cuáles son sus fortalezas y limitaciones naturales.
+
+Perfil predominante: ${perfil_predominante} — ${titulo}
+Perfil complementario: ${perfil_complementario}
+Puntajes normalizados: D=${norm.D} I=${norm.I} S=${norm.S} C=${norm.C}
+Rasgos: ${traits.join(', ')}
+Duración del test: ${duracion_total_seg} segundos
+
+Responde SOLO con el texto de la interpretación, sin títulos ni viñetas.`,
+        }],
+      }),
+    });
+    const claudeData = await claudeRes.json();
+    interpretacion = claudeData.content?.[0]?.text ?? null;
+  } catch (e) {
+    console.error('Error generando interpretación Claude:', e.message);
+  }
+
   // Guardar resultado DISC en el candidato
   const informe = {
     titulo,
@@ -43,6 +76,7 @@ export default async function handler(req, res) {
     scores,
     norm,
     traits,
+    interpretacion,
     duracion_total_seg,
     tiempos_por_pregunta,
     completado_en: new Date().toISOString(),
