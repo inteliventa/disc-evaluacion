@@ -47,10 +47,10 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-5',
-        max_tokens: 600,
+        max_tokens: 1500,
         messages: [{
           role: 'user',
-          content: `Eres un experto en perfiles conductuales DISC. Redacta una interpretación narrativa breve (3-4 párrafos) para la siguiente evaluación. Escribe en español, en tercera persona, sin mencionar cargos específicos. Enfócate en: cómo se comporta esta persona, cómo se comunica, cómo toma decisiones, cómo reacciona bajo presión, y cuáles son sus fortalezas y limitaciones naturales.
+          content: `Eres un experto en perfiles conductuales DISC. Redacta una interpretación narrativa completa (4-5 párrafos) para la siguiente evaluación. Escribe en español, en tercera persona, sin mencionar cargos específicos. Enfócate en: cómo se comporta esta persona, cómo se comunica, cómo toma decisiones, cómo reacciona bajo presión, y cuáles son sus principales fortalezas y limitaciones naturales.
 
 Perfil predominante: ${perfil_predominante} — ${titulo}
 Perfil complementario: ${perfil_complementario}
