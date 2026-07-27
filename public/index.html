@@ -327,6 +327,10 @@
 <section class="section" id="sec-intro-2">
   <p class="intro-eyebrow">Antes de comenzar</p>
   <div class="warning-grid">
+    <div class="warn-card blue">
+      <span class="warn-icon">✔️</span>
+      <span class="warn-text">En cada pregunta verás 4 opciones. Debes elegir <strong>2</strong>: la que <strong>más te identifique</strong> y la que <strong>menos te identifique</strong>.</span>
+    </div>
     <div class="warn-card yellow">
       <span class="warn-icon">⏱</span>
       <span class="warn-text"><strong>Cada pregunta tiene 20 segundos.</strong> El tiempo corre desde que aparece la pregunta. Responde con tu primera impresión; si el tiempo se agota, la pregunta avanza automáticamente.</span>
@@ -334,10 +338,6 @@
     <div class="warn-card red">
       <span class="warn-icon">⚠️</span>
       <span class="warn-text"><strong>Una vez iniciada, la evaluación debe completarse en una sola sesión.</strong> No puedes pausarla, retroceder ni cerrar la ventana. Asegúrate de tener <strong>10 minutos sin interrupciones</strong> antes de comenzar.</span>
-    </div>
-    <div class="warn-card blue">
-      <span class="warn-icon">✔️</span>
-      <span class="warn-text">En cada pregunta verás 4 opciones. Debes elegir <strong>2</strong>: la que <strong>más te identifique</strong> y la que <strong>menos te identifique</strong>.</span>
     </div>
   </div>
   <div style="margin-top:2rem;">
@@ -394,6 +394,25 @@
   </div>
   <div class="options-grid" id="optionsGrid"></div>
   <div class="nav-row">
+  </div>
+</section>
+
+<!-- PRÁCTICA -->
+<section class="section" id="sec-practice">
+  <p class="intro-eyebrow">Pregunta de práctica</p>
+  <h2 class="intro-title" style="font-size:1.5rem; margin-bottom:.5rem;">Así funciona la evaluación</h2>
+  <p class="intro-body" style="margin-bottom:1.8rem;">Esta pregunta <strong>no cuenta</strong>. Selecciona la opción que <strong>más</strong> te identifica y luego la que <strong>menos</strong> te identifica. Cuando elijas las dos, avanzarás automáticamente.</p>
+  <p class="question-label">Elige cómo te describes</p>
+  <p class="question-sub">Selecciona <strong>la que MÁS</strong> te identifica y <strong>la que MENOS</strong> te identifica.</p>
+  <div class="options-grid" id="practiceGrid"></div>
+  <div id="practiceFeedback" style="display:none; margin-top:1.5rem; padding:1rem 1.2rem; background:rgba(61,191,168,0.08); border:1px solid rgba(61,191,168,0.25); border-radius:10px; color:#3DBFA8; font-size:.9rem; line-height:1.6;">
+    <strong>¡Perfecto!</strong> Así funciona cada pregunta. Recuerda elegir siempre una opción que MÁS te identifique y una que MENOS te identifique.
+    <div style="margin-top:1.2rem;">
+      <button class="btn-primary" onclick="beginRealAssessment()">
+        Comenzar evaluación real
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -702,8 +721,67 @@ function onTimeout() {
   }, 1800);
 }
 
+// ── Practice ───────────────────────────────────────────────────
+const PRACTICE_Q = {
+  text: 'Cuando trabajas en equipo, ¿cuál de estas palabras te describe mejor?',
+  options: [
+    { dim: 'D', hint: 'Líder — tomo la iniciativa y dirijo al grupo' },
+    { dim: 'I', hint: 'Motivador — animo al equipo y genero entusiasmo' },
+    { dim: 'S', hint: 'Apoyo — escucho y ayudo a que todo fluya' },
+    { dim: 'C', hint: 'Analítico — evalúo las opciones antes de actuar' },
+  ]
+};
+let practiceAnswer = { most: null, least: null };
+
+function renderPractice() {
+  practiceAnswer = { most: null, least: null };
+  document.getElementById('practiceFeedback').style.display = 'none';
+  const grid = document.getElementById('practiceGrid');
+  grid.innerHTML = '';
+  PRACTICE_Q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.id = `pr-${opt.dim}`;
+    btn.innerHTML = `<span class="option-hint">${opt.hint}</span>`;
+    btn.addEventListener('click', () => selectPracticeOption(opt.dim));
+    grid.appendChild(btn);
+  });
+}
+function selectPracticeOption(dim) {
+  const a = practiceAnswer;
+  if      (a.most === null)  a.most  = dim;
+  else if (a.most === dim)   a.most  = null;
+  else if (a.least === dim)  a.least = null;
+  else if (a.least === null) a.least = dim;
+  else                       a.least = dim;
+  // Re-render badges
+  PRACTICE_Q.options.forEach(opt => {
+    const btn = document.getElementById(`pr-${opt.dim}`);
+    if (!btn) return;
+    btn.className = 'option-btn';
+    if (a.most  === opt.dim) btn.classList.add('selected-most');
+    if (a.least === opt.dim) btn.classList.add('selected-least');
+    btn.innerHTML = `
+      <span class="option-hint">${opt.hint}</span>
+      ${a.most  === opt.dim ? '<span class="option-badge badge-most">Más</span>'   : ''}
+      ${a.least === opt.dim ? '<span class="option-badge badge-least">Menos</span>' : ''}
+    `;
+    btn.addEventListener('click', () => selectPracticeOption(opt.dim));
+  });
+  if (a.most && a.least && a.most !== a.least) {
+    setTimeout(() => {
+      document.querySelectorAll('#practiceGrid .option-btn').forEach(b => b.classList.add('locked'));
+      document.getElementById('practiceFeedback').style.display = 'block';
+    }, 400);
+  }
+}
+
 // ── Flow ───────────────────────────────────────────────────────
 async function startAssessment() {
+  renderPractice();
+  showSection('sec-practice');
+}
+async function beginRealAssessment() {
   current = 0; answers = QUESTIONS.map(() => ({ most: null, least: null }));
   inTest = true; testStartTime = Date.now(); answerTimes = [];
   localStorage.setItem('disc_in_progress', candidateEmail);
